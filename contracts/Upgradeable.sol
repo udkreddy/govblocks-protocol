@@ -20,16 +20,21 @@ import "./Master.sol";
 
 contract Upgradeable {
 
-    Master public ms;
+    Master public master;
+
+    modifier onlyInternal {
+        require(master.isInternal(msg.sender));
+        _;
+    }
 
     function updateDependencyAddresses() public; //To be implemented by every contract depending on its needs
 
     function changeMasterAddress(address _masterAddress) public {
-        if (address(ms) == address(0))
-            ms = Master(_masterAddress);
+        if (address(master) == address(0))
+            master = Master(_masterAddress);
         else {
-            require(msg.sender == address(ms));
-            ms = Master(_masterAddress);
+            require(msg.sender == address(master));
+            master = Master(_masterAddress);
         }
     }
 }

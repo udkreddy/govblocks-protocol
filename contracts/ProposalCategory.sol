@@ -38,6 +38,25 @@ contract ProposalCategory is IProposalCategory, Governed {
     
     CategoryStruct[] internal allCategory;
     mapping (uint => CategoryAction) internal categoryActionData;
+
+    ///@dev just to follow the interface
+    function updateDependencyAddresses() public { //solhint-disable-line
+        if(!constructorCheck) {
+            proposalCategoryInitiate();
+            constructorCheck = true;
+        }
+    }
+
+    /// @dev just to adhere to GovBlockss' Upgradeable interface
+    function changeMasterAddress(address _masterAddress) public { //solhint-disable-line
+        masterAddress = _masterAddress;
+        if (address(masterAddress) == address(0))
+            masterAddress = _masterAddress;
+        else {
+            require(msg.sender == address(masterAddress));
+            masterAddress = _masterAddress;
+        }
+    }
     
     /// @dev Adds new category
     /// @param _name Category name
@@ -105,7 +124,7 @@ contract ProposalCategory is IProposalCategory, Governed {
         uint[] _incentives
     )
         public
-        onlyAuthorizedToGovern //solhint-disable
+        onlyAuthorizedToGovern
     { 
         allCategory[_categoryId].memberRoleToVote = _memberRoleToVote;
         allCategory[_categoryId].majorityVotePerc = _majorityVotePerc;
@@ -144,24 +163,6 @@ contract ProposalCategory is IProposalCategory, Governed {
     /// @dev Gets Total number of categories added till now
     function totalCategories() external view returns(uint) {
         return allCategory.length;
-    }
-
-    ///@dev just to follow the interface
-    function updateDependencyAddresses() public { //solhint-disable-line
-        if (!constructorCheck) {
-            proposalCategoryInitiate();
-            constructorCheck = true;
-        }
-    }
-
-    /// @dev just to adhere to GovBlockss' Upgradeable interface
-    function changeMasterAddress(address _masterAddress) public { //solhint-disable-line
-        if (address(masterAddress) == address(0))
-            masterAddress = _masterAddress;
-        else {
-            require(msg.sender == masterAddress);
-            masterAddress = _masterAddress;
-        }
     }
 
     /// @dev Initiates Default settings for Proposal Category contract (Adding default categories)
